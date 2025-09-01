@@ -68,7 +68,7 @@ export default function ShiritoriGame() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4 pb-8">
       {/* Countdown Modal */}
       {gameState.gameStatus === "countdown" && (
         <CountdownModal
@@ -79,61 +79,44 @@ export default function ShiritoriGame() {
       )}
 
       {/* Game Status */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-4 sm:mb-6">
         {(gameState.gameStatus === "waiting" ||
           gameState.gameStatus === "countdown") && (
-          <div className="space-y-2">
-            <p className="text-lg font-semibold text-gray-800 dark:text-white">
+          <div className="space-y-2 px-4">
+            <p className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">
               Game starts with letter:{" "}
-              <span className="text-3xl font-bold text-blue-600">
+              <span className="text-2xl sm:text-3xl font-bold text-blue-600 block sm:inline mt-1 sm:mt-0">
                 {gameState.startingLetter}
               </span>
             </p>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
               Player 1 enters the first word starting with "
               {gameState.startingLetter}"
             </p>
           </div>
         )}
 
-        {gameState.gameStatus === "playing" && (
-          <div className="space-y-2">
-            <p className="text-lg font-semibold text-gray-800 dark:text-white">
-              {gameState.players[gameState.currentPlayerIndex].name}'s Turn
-            </p>
-            <p className="text-gray-600 dark:text-gray-300">
-              {gameState.lastWord ? (
-                <>
-                  Next word must start with:{" "}
-                  <span className="font-bold text-xl text-blue-600">
-                    {getNextLetter()}
-                  </span>
-                </>
-              ) : (
-                <>
-                  Enter first word starting with:{" "}
-                  <span className="font-bold text-xl text-blue-600">
-                    {gameState.startingLetter}
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
-        )}
+         {gameState.gameStatus === "playing" && (
+           <div className="space-y-2 px-4">
+             <p className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">
+               {gameState.players[gameState.currentPlayerIndex].name}'s Turn
+             </p>
+           </div>
+         )}
 
-        {gameState.gameStatus === "ended" && gameState.winner && (
-          <div className="space-y-4">
-            <p className="text-2xl font-bold text-green-600">
-              {gameState.winner.name} Wins!
-            </p>
-            <button
-              onClick={resetGame}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Play Again
-            </button>
-          </div>
-        )}
+         {gameState.gameStatus === "ended" && gameState.winner && (
+           <div className="space-y-4 px-4">
+             <p className="text-xl sm:text-2xl font-bold text-green-600">
+               🎉 {gameState.winner.name} Wins! 🎉
+             </p>
+             <button
+               onClick={resetGame}
+               className="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+             >
+               Play Again
+             </button>
+           </div>
+         )}
       </div>
 
       {/* Error Message */}
@@ -146,7 +129,7 @@ export default function ShiritoriGame() {
       )}
 
       {/* Players */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <PlayerCard
           player={gameState.players[0]}
           isActive={isPlayerTurn(1)}
@@ -156,10 +139,13 @@ export default function ShiritoriGame() {
             setInputs((prev) => ({ ...prev, player1: value }))
           }
           onKeyPress={(e) => e.key === "Enter" && handleSubmit(1)}
+          onSubmit={() => handleSubmit(1)}
           onNameChange={(name) => updatePlayerName(1, name)}
           canEditName={gameState.gameStatus === "waiting"}
           inputRef={player1InputRef}
           gameStatus={gameState.gameStatus}
+          requiredLetter={getNextLetter()}
+          isFirstWord={!gameState.lastWord}
         />
 
         <PlayerCard
@@ -171,10 +157,13 @@ export default function ShiritoriGame() {
             setInputs((prev) => ({ ...prev, player2: value }))
           }
           onKeyPress={(e) => e.key === "Enter" && handleSubmit(2)}
+          onSubmit={() => handleSubmit(2)}
           onNameChange={(name) => updatePlayerName(2, name)}
           canEditName={gameState.gameStatus === "waiting"}
           inputRef={player2InputRef}
           gameStatus={gameState.gameStatus}
+          requiredLetter={getNextLetter()}
+          isFirstWord={!gameState.lastWord}
         />
       </div>
     </div>

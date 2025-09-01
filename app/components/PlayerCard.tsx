@@ -5,10 +5,13 @@ const PlayerCard = ({
   input,
   onInputChange,
   onKeyPress,
+  onSubmit,
   onNameChange,
   canEditName,
   inputRef,
   gameStatus,
+  requiredLetter,
+  isFirstWord,
 }: {
   player: any;
   isActive: boolean;
@@ -16,10 +19,13 @@ const PlayerCard = ({
   input: string;
   onInputChange: (value: string) => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
+  onSubmit: () => void;
   onNameChange: (name: string) => void;
   canEditName: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
   gameStatus: string;
+  requiredLetter: string;
+  isFirstWord: boolean;
 }) => {
   const borderColor = player.id === 1 ? "border-blue-500" : "border-green-500";
   const bgColor =
@@ -44,7 +50,7 @@ const PlayerCard = ({
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-center md:justify-between mb-4">
         <input
           type="text"
           value={player.name}
@@ -64,32 +70,77 @@ const PlayerCard = ({
       {/* Timer */}
       <div className="text-center mb-4">
         {isActive && gameStatus === "playing" && timeLeft !== null && (
-          <div className={`text-4xl font-bold ${getTimerColor(timeLeft)}`}>
+          <div className={`text-3xl sm:text-4xl font-bold ${getTimerColor(timeLeft)}`}>
             {timeLeft}s
           </div>
         )}
         {!isActive && gameStatus === "playing" && (
-          <div className="text-2xl font-bold text-gray-400">Waiting...</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-400">Waiting...</div>
         )}
       </div>
 
-      {/* Input */}
-      <input
-        ref={inputRef}
-        type="text"
-        value={input}
-        onChange={(e) =>
-          onInputChange(e.target.value.replace(/[^a-zA-Z]/g, ""))
-        }
-        onKeyPress={onKeyPress}
-        disabled={gameStatus === "ended" || gameStatus === "countdown"}
-        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors dark:bg-gray-700 dark:text-white ${
-          isActive
-            ? `${borderColor} ${focusColor}`
-            : "border-gray-300 dark:border-gray-600 focus:border-gray-400"
-        } ${gameStatus === "ended" ? "opacity-50" : ""}`}
-        maxLength={20}
-      />
+      {/* Required Letter Display */}
+      {gameStatus === "playing" && (
+        <div className="text-center mb-3">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {isFirstWord ? "First word starts with:" : "Next word starts with:"}
+          </p>
+          <div className="text-2xl font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg py-2 px-4 inline-block">
+            {requiredLetter}
+          </div>
+        </div>
+      )}
+
+      {/* Input and Submit */}
+      <div className="space-y-3">
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) =>
+            onInputChange(e.target.value.replace(/[^a-zA-Z]/g, ""))
+          }
+          onKeyPress={onKeyPress}
+          disabled={gameStatus === "ended" || gameStatus === "countdown"}
+          placeholder={
+            gameStatus === "countdown" ? "Wait for countdown..." :
+            !isActive ? "Wait for your turn" :
+            `Type word starting with "${requiredLetter}" (Press Enter to submit)`
+          }
+          enterKeyHint="done"
+          inputMode="text"
+          autoCapitalize="none"
+          autoComplete="off"
+          className={`w-full px-4 py-3 text-base sm:text-lg border-2 rounded-lg focus:outline-none transition-colors dark:bg-gray-700 dark:text-white ${
+            isActive
+              ? `${borderColor} ${focusColor}`
+              : "border-gray-300 dark:border-gray-600 focus:border-gray-400"
+          } ${gameStatus === "ended" ? "opacity-50" : ""}`}
+          maxLength={20}
+        />
+        
+        {/* Submit Button for Mobile Only */}
+        {isActive && gameStatus === "playing" && (
+          <button
+            onClick={onSubmit}
+            disabled={!input.trim() || input.length < 4}
+            className={`w-full md:hidden py-3 px-4 text-base font-semibold rounded-lg transition-colors ${
+              player.id === 1
+                ? "bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300"
+                : "bg-green-500 hover:bg-green-600 disabled:bg-green-300"
+            } text-white disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            Submit Word {input.length >= 4 ? `(${input.toUpperCase()})` : `(${4 - input.length} more letters needed)`}
+          </button>
+        )}
+
+        {/* Desktop hint */}
+        {isActive && gameStatus === "playing" && (
+          <p className="hidden md:block text-xs text-gray-500 text-center">
+            Press Enter to submit • {input.length >= 4 ? "Ready to submit!" : `Need ${4 - input.length} more letters`}
+          </p>
+        )}
+      </div>
 
       {/* Words History */}
       <div className="mt-4">
